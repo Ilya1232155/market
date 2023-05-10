@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from models import db, Product
-
+#здесь был вася
 
 app = Flask(__name__)
 
