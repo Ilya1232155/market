@@ -67,6 +67,13 @@ def users():
 			product = {"id":p.id,"articul":p.articul,"name":p.name,"description":p.description}
 			products_list["products"].append(product)
 		return jsonify(products_list)
+		if request.method == "POST":
+			data=request.json
+			email=data["email"]
+			password=["password"]
+			admin=["admin"]
+			user = User.query.filter_by(email=email, password=password, admin=admin).first()
+			
 
 @app.route("/api/cards", methods = ["POST", "GET"])
 def carts():
@@ -78,5 +85,19 @@ def carts():
 			product = {"id":p.id,"articul":p.articul,"name":p.name,"description":p.description}
 			products_list["products"].append(product)
 		return jsonify(products_list)
+	if request.method == "POST":
+		data=request.json
+		user_id=data["user_id"]
+		product_id=["product_id"]
+		count=["count"]
+		cart = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+		if cart:
+			cart.count=count
+		else:
+			cart=Cart(user_id, product_id, count)
+		
+		db.session.add(cart)
+		db.session.commit()
+		return {"message":"Product was add in database"}
 
 app.run()
