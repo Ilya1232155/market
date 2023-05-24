@@ -46,6 +46,7 @@ def products():
 		articul = data['articul']
 		name = data['name']
 		cost = data['cost']
+
 		product = Product.query.filter_by(articul=articul).first()
 		if product:
 			return {"error":"Articul already registered"}
@@ -53,33 +54,82 @@ def products():
 		if product:
 			return {"error": "Name already registered"}
 		product = Product(articul,name,cost)
+		try:
+			description = data.get('description')
+			product.description = description
+		except:
+			pass
 		db.session.add(product)
 		db.session.commit()
 		return {"message":"Product was add in database"}
-#@app.route("/api/products/<p_id>", methods = ["GET", "PUT", "DELETE"])
+
+@app.route("/api/products/<p_id>", methods = ["GET", "PUT", "DELETE"])
+def product_page(p_id):
+	if request.method == "GET":
+		products_list = {"products": []}
+		p = Product.query.filter_by(id=p_id).first_or_404()
+		product = {"id":p.id,"articul":p.articul,"name":p.name,"description":p.description}
+		products_list["products"].append(product)
+		return jsonify(products_list)
+	if request.method == "PUT":
+		data = request.json
+		articul = data['articul']
+		name = data['name']
+		cost = data['cost']
+		description = data['description']
+		product = Product.query.filter_by(articul=articul).first()
+		if product:
+			return {"error": "Articul already registered"}
+		product = Product.query.filter_by(name=name).first()
+		if product:
+			return {"error": "Name already registered"}
+		product = Product.query.filter_by(id=p_id).first_or_404()
+		product.articul = articul
+		product.name = name
+		product.cost = cost
+		product.description = description
+		db.session.add(product)
+		db.session.commit()
+		return {"message": "Product was updated in database"}
+	if request.method == "DELETE":
+		product = Product.query.filter_by(id=p_id).first_or_404()
+		db.session.delete(product)
+		return {"message": "Product was deleted from database"}
 	
 @app.route("/api/users", methods = ["POST", "GET"])
 def users():
 	if request.method == "GET":
-		products_list = {"products": []}
-		products_data = Product.query.all()
-		for p in products_data:
-			print(p.articul, p.name, p.description, p.id)
-			product = {"id":p.id,"articul":p.articul,"name":p.name,"description":p.description}
-			products_list["products"].append(product)
-		return jsonify(products_list)
+		users_list = {"users": []}
+		users_data = User.query.all()
+		for u in users_data:
+			user = {"id":u.id,"email":u.email}
+			users_list["users"].append(user)
+		return jsonify(users_list)
+	if request.method == "POST":
+		data = request.json
+		email = data["email"]
+		password = data["password"]
+		pass_confirm = data["pass_confirm"]
+		admin = data["admin"]
+		user = User.query.filter_by(email=email).first()
+		if user:
+			return {"error": "email already registered"}
+		if password != pass_confirm:
+			return {"error": "Password not confirmed"}
+		user = User(email, password)
+		user.admin = admin
+		db.session.add(user)
+		db.session.commit()
+		return {"message": f"User {email} was registered"}
 
-		if request.method == "POST":
-			data=request.json
-			email=data["email"]
-			password=["password"]
-			admin=["admin"]
-			user = User.query.filter_by(email=email, password=password, admin=admin).first()
+#Добавить обработчик для конкретного пользователя - получить, изменить, удалить
+#@app.route("/api/users/<p_id>", methods = ["GET", "PUT", "DELETE"])
 			
 
 
 @app.route("/api/cards", methods = ["POST", "GET"])
 def carts():
+	#Исправить обработчик, чтоб выдавал записи в корзине, а не товары
 	if request.method == "GET":
 		products_list = {"products": []}
 		products_data = Product.query.all()
@@ -102,7 +152,8 @@ def carts():
 		
 		db.session.add(cart)
 		db.session.commit()
-		return {"message":"Product was add in database"}
-
+		return {"message":"Cart was add in database"}
+#Добавить обработчик для записи в корзине - получить, изменить, удалить
+#@app.route("/api/carts/<p_id>", methods = ["GET", "PUT", "DELETE"])
 
 app.run()
