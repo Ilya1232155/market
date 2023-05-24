@@ -56,7 +56,8 @@ def products():
 		db.session.add(product)
 		db.session.commit()
 		return {"message":"Product was add in database"}
-
+#@app.route("/api/products/<p_id>", methods = ["GET", "PUT", "DELETE"])
+	
 @app.route("/api/users", methods = ["POST", "GET"])
 def users():
 	if request.method == "GET":
@@ -67,6 +68,7 @@ def users():
 			product = {"id":p.id,"articul":p.articul,"name":p.name,"description":p.description}
 			products_list["products"].append(product)
 		return jsonify(products_list)
+	# If request.method == "POST": #Создать добавление пользователя
 
 @app.route("/api/cards", methods = ["POST", "GET"])
 def carts():
@@ -78,5 +80,6 @@ def carts():
 			product = {"id":p.id,"articul":p.articul,"name":p.name,"description":p.description}
 			products_list["products"].append(product)
 		return jsonify(products_list)
+	# if request.method == "POST": #Создать пополнение корзины
 
 app.run()
